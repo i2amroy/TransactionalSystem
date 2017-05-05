@@ -31,35 +31,58 @@ public class TransactionThread extends Thread {
             Message goal = (Message) instream.readObject();
             // If we are doing a transfer
             if (goal.action.equals("TRANSFER")) {
-                // then first get the locks we need
-                ReadWriteLock sourcelock = datasource.get_lock(goal.source);
-                ReadWriteLock targetlock = datasource.get_lock(goal.target);
+                if (goal.source != goal.target) {
+                    // first get the locks we need
+                    ReadWriteLock sourcelock = datasource.get_lock(goal.source);
+                    ReadWriteLock targetlock = datasource.get_lock(goal.target);
 
-                // Set these up for use in our return message
-                int source = 0;
-                int target = 0;
+                    // Set these up for use in our return message
+                    int source = 0;
+                    int target = 0;
+                    int source2 = 0;
+                    int target2 = 0;
 
-                // Actually lock our locks here
-                sourcelock.writeLock().lock();
-                targetlock.writeLock().lock();
-                try {
-                    // Get the balance of each amount and store it
-                    source = datasource.get_account_balance(goal.source);
-                    target = datasource.get_account_balance(goal.target);
-                    // Then set to the new balances appropriately
-                    datasource.set_account_balance(goal.source, source - goal.value);
-                    datasource.set_account_balance(goal.target, target + goal.value);
-                } finally {
-                    // Lastly we always unlock here regardless of if something goes wrong above
-                    sourcelock.writeLock().unlock();
-                    targetlock.writeLock().unlock();
+                    // Actually lock our locks here
+                    sourcelock.writeLock().lock();
+                    targetlock.writeLock().lock();
+                    try {
+                        // Get the balance of each amount and store it
+                        source = datasource.get_account_balance(goal.source);
+                        target = datasource.get_account_balance(goal.target);
+                        // Then set to the new balances appropriately
+                        datasource.set_account_balance(goal.source, source - goal.value);
+                        datasource.set_account_balance(goal.target, target + goal.value);
+                        source2 = datasource.get_account_balance(goal.source);
+                        target2 = datasource.get_account_balance(goal.target);
+                        System.out.println("Source: " + goal.source + " Targ: " + goal.target + " Val: " + goal.value + " StartS: " + source + " StartT: " + target + " EndS: " + source2 + " EndT: " + target2);
+                    } finally {
+                        // Lastly we always unlock here regardless of if something goes wrong above
+                        sourcelock.writeLock().unlock();
+                        targetlock.writeLock().unlock();
+                    }
+
+                    // At this point we've supposedly completed our transaction, setup and send our return message
+                    Message ret = new Message("TRANSFERCOMPLETE");
+                    ret.source = source2;
+                    ret.target = target2;
+                    outstream.writeObject(ret);
+                } else {
+                    // If they are the same we don't actually need to do anything, but we do need to return the balance
+                    ReadWriteLock sourcelock = datasource.get_lock(goal.source);
+                    int source = 0;
+                    sourcelock.readLock().lock();
+                    try {
+                        source = datasource.get_account_balance(goal.source);
+                    } finally {
+                        sourcelock.readLock().unlock();
+                    }
+
+                    // At this point we've supposedly completed our transaction, setup and send our return message
+                    Message ret = new Message("TRANSFERCOMPLETE");
+                    ret.source = source;
+                    ret.target = source;
+                    outstream.writeObject(ret);
                 }
-
-                // At this point we've supposedly completed our transaction, setup and send our return message
-                Message ret = new Message("TRANSFERCOMPLETE");
-                ret.source = source;
-                ret.target = target;
-                outstream.writeObject(ret);
             }
         } catch (IOException e) {
             System.err.println("Error in Transaction Thread: Unable to get I/O connection.");
