@@ -32,6 +32,12 @@ public class ClientThread extends Thread {
 
     @Override
     public void run() {
+        // Make threads wait a random amount at the start so we can easily see that interleaving works
+        try {
+            Thread.sleep(ClientKickoff.rng.nextInt(500));
+        } catch (InterruptedException e) {
+            // Do nothing
+        }
         try {
             Socket server_sock = new Socket(InetAddress.getByName(IP_address), port);
             ObjectOutputStream outstream = new ObjectOutputStream(server_sock.getOutputStream());

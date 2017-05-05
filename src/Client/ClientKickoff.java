@@ -9,10 +9,10 @@ public class ClientKickoff {
     // The port used for the connection, NOTE: must match the server's port
     private static final int PORT = 23657;
     private static final String IP = "192.168.0.3";
-    private static final int threadcount = 5;
+    private static final int threadcount = 50;
     private static final int max_transfer = 10;
     private static final int max_account_num = 10;
-    private static final Random rng = new Random();
+    public static final Random rng = new Random();
 
     public static void main(String[] args) {
         for (int i = 0; i < threadcount; i++) {
