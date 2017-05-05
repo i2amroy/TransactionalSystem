@@ -39,8 +39,6 @@ public class TransactionThread extends Thread {
                     // Set these up for use in our return message
                     int source = 0;
                     int target = 0;
-                    int source2 = 0;
-                    int target2 = 0;
 
                     // Actually lock our locks here
                     sourcelock.writeLock().lock();
@@ -49,12 +47,11 @@ public class TransactionThread extends Thread {
                         // Get the balance of each amount and store it
                         source = datasource.get_account_balance(goal.source);
                         target = datasource.get_account_balance(goal.target);
+                        source -= goal.value;
+                        target += goal.value;
                         // Then set to the new balances appropriately
-                        datasource.set_account_balance(goal.source, source - goal.value);
-                        datasource.set_account_balance(goal.target, target + goal.value);
-                        source2 = datasource.get_account_balance(goal.source);
-                        target2 = datasource.get_account_balance(goal.target);
-                        System.out.println("Source: " + goal.source + " Targ: " + goal.target + " Val: " + goal.value + " StartS: " + source + " StartT: " + target + " EndS: " + source2 + " EndT: " + target2);
+                        datasource.set_account_balance(goal.source, source);
+                        datasource.set_account_balance(goal.target, target);
                     } finally {
                         // Lastly we always unlock here regardless of if something goes wrong above
                         sourcelock.writeLock().unlock();
@@ -63,8 +60,8 @@ public class TransactionThread extends Thread {
 
                     // At this point we've supposedly completed our transaction, setup and send our return message
                     Message ret = new Message("TRANSFERCOMPLETE");
-                    ret.source = source2;
-                    ret.target = target2;
+                    ret.source = source;
+                    ret.target = target;
                     outstream.writeObject(ret);
                 } else {
                     // If they are the same we don't actually need to do anything, but we do need to return the balance
@@ -83,6 +80,7 @@ public class TransactionThread extends Thread {
                     ret.target = source;
                     outstream.writeObject(ret);
                 }
+                System.out.println("Transaction complete. Source: " + goal.source + " Target: " + goal.target);
             }
         } catch (IOException e) {
             System.err.println("Error in Transaction Thread: Unable to get I/O connection.");
