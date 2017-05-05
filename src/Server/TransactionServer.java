@@ -13,7 +13,7 @@ public class TransactionServer {
     }
 
     private void run_server() {
-        new TransactionAcceptThread(data, PORT).run();
+        new TransactionAcceptThread(data, PORT).start();
     }
 
     public static void main(String[] args) {

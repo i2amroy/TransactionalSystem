@@ -25,7 +25,7 @@ public class TransactionAcceptThread extends Thread {
                 // We copy over the socket here so no need for a mutex lock
                 Socket socket = serversock.accept();
                 System.out.println("Accepting connection");
-                new TransactionThread(socket, data);
+                new TransactionThread(socket, data).start();
             }
         } catch (IOException e) {
             System.err.println("Error in TransactionAcceptThread: Unable to get I/O connection.");
