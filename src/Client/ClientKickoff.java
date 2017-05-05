@@ -21,7 +21,7 @@ public class ClientKickoff {
             int value = rng.nextInt(max_transfer);
             System.out.println("Creating Transaction " + i + " Source: " + source + " Target: " + target +
                     " Value: " + value);
-            new ClientThread(PORT, IP, i, source, target, value).run();
+            new ClientThread(PORT, IP, i, source, target, value).start();
         }
     }
 }
