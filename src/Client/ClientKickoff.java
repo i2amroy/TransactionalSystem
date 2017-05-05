@@ -1,6 +1,7 @@
 package Client;
 
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Created by ChristianBuskirk on 5/5/17.
@@ -12,13 +13,12 @@ public class ClientKickoff {
     private static final int threadcount = 50;
     private static final int max_transfer = 10;
     private static final int max_account_num = 10;
-    public static final Random rng = new Random();
 
     public static void main(String[] args) {
         for (int i = 0; i < threadcount; i++) {
-            int source = rng.nextInt(max_account_num);
-            int target = rng.nextInt(max_account_num);
-            int value = rng.nextInt(max_transfer);
+            int source = ThreadLocalRandom.current().nextInt(max_account_num);
+            int target = ThreadLocalRandom.current().nextInt(max_account_num);
+            int value = ThreadLocalRandom.current().nextInt(max_transfer);
             System.out.println("Creating Transaction " + i + " Source: " + source + " Target: " + target +
                     " Value: " + value);
             new ClientThread(PORT, IP, i, source, target, value).start();

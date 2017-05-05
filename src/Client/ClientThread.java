@@ -6,6 +6,7 @@ import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.concurrent.ThreadLocalRandom;
 
 import Messages.Message;
 
@@ -34,7 +35,7 @@ public class ClientThread extends Thread {
     public void run() {
         // Make threads wait a random amount at the start so we can easily see that interleaving works
         try {
-            Thread.sleep(ClientKickoff.rng.nextInt(500));
+            Thread.sleep(ThreadLocalRandom.current().nextInt(500));
         } catch (InterruptedException e) {
             // Do nothing
         }
