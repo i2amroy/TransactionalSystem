@@ -1,6 +1,7 @@
 package Server;
 
 import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * Created by ChristianBuskirk on 5/4/17.
@@ -17,6 +18,9 @@ public class DataManager {
         }
         // Initialize our locks
         locks = new ReadWriteLock[10];
+        for (int i = 0; i < 10; i++) {
+            locks[i] = new ReentrantReadWriteLock();
+        }
     }
 
     public int get_account_balance(int account) {
